@@ -13,21 +13,21 @@
 const lib = {};
 
 // Check out to stripe
-lib.checkOut = function(amount, email, callback){
+lib.checkOut = function(amount, email, stripeToken, callback){
     var amount = typeof(amount) == 'number' && amount > 0 ? amount : false;
-    var email = typeof(email) == 'string' && validators.validateEmail(email) ? email : false;
+    var email = validators.validateEmail(email) ? email : false;
+    var stripeToken = validators.validateString(stripeToken) ? stripeToken : false;
 
     if(amount && email){
         
         // Configure the request payload
         var payload = {
-            'amount' : amount*100,
+            'amount' : Math.round(amount*100),
             'currency' : 'usd',
-            'source' : 'tok_visa',
+            'source' : stripeToken,
             'description' : 'Charge for ' + email
         };
         var stringPayload = querystring.stringify(payload);
-
         
         // Configure the request details
         const requestDetails = {

@@ -27,7 +27,8 @@ lib.sendEmail = function(toEmail, toName, subject, message, callback) {
             'from' : 'Pizza Napolitana <'+ config.mailgun.from +'>',
             'to' : toEmail,
             'subject' : subject,
-            'text' : message
+            'text' : 'Your mail does not support HTML',
+            'html' : message
         };
 
         // Stringfy the payload
@@ -50,11 +51,11 @@ lib.sendEmail = function(toEmail, toName, subject, message, callback) {
         var req = https.request(requestDetails, res => {
             // Grab the status of the sent request
             var status = res.statusCode;
-
             // Callback successfuly if the request went through
             if (status == 200 || status == 201) {
                 callback(false);
             } else {
+                console.log('Status code returned was '+ status);
                 callback('Status code returned was '+ status);
             }
         });

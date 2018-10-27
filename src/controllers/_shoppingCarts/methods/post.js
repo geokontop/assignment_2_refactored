@@ -42,7 +42,6 @@ const post = function(data,callback){
                                 if(!err){
                                     callback(200)
                                 }else{
-                                    console.log(err)
                                     callback(500,{'Error':'Could not create the new shopping cart'})
                                 }
                             })    

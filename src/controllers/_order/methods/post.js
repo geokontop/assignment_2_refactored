@@ -11,16 +11,18 @@ const stripe = require('../../../services/stripe');
 const mailgun = require('../../../services/mailgun');
 const validator = require('../../../services/validators');
 const _orderData = require('../../../models/orders/orderData');
+const helpers = require('../../../services/helpers')
 
 
 // Post
-// Required data : none
+// Required data : stripeToken
 // Optional data : none
 // Required header : token
 const post = function(data,callback){
-        
     // Get the token from the headers
     const token = validator.validateToken(data.headers.token) ? data.headers.token:false;
+    // Get the stripeToken from the payload
+    const stripeToken = validator.validateString(data.payload.stripeToken) ? data.payload.stripeToken:false;
     // Retrieve token object        
     _data.read('tokens',token,function(err,tokenData){
         // Check authentication
@@ -33,15 +35,17 @@ const post = function(data,callback){
                         // Retrieve cart
                         _shoppingCartData.getCartDetailsByToken(token,(cartDetails)=>{
                             if(cartDetails){
-                                stripe.checkOut(cartDetails.total,user.email,(status)=>{                                        
+                                stripe.checkOut(cartDetails.total,user.email,stripeToken,(status)=>{                                        
                                     if(!status){   
                                         console.log({'Message': 'Payment received .. sending message'});
+
+                                        const htmlMessage = helpers.renderEmailMsg(cartDetails);
                                         //If the payment is successful. Send the mail
-                                        mailgun.sendEmail(user.email, user.name, 'Your order details '+ user.name, 'some template populated with .... '+JSON.stringify(cartDetails),(res)=>{
+                                        mailgun.sendEmail(user.email, user.name, 'Your order details '+ user.name, htmlMessage,(res)=>{
                                             if(!res){
                                                 _orderData.saveOrder(token,cartDetails,user,(saved)=>{
                                                     if(saved){
-                                                        callback(200,{'Message': 'Payment received, message has been sent and order has been logged'})
+                                                        callback(200,{'Message': 'Payment received, message has been sent'})
                                                     }else{
                                                         callback(400, {'Error': 'Could not log order'})
                                                     }

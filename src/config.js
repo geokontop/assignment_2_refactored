@@ -11,7 +11,7 @@ const environments = {};
 
 const stripe = {
   "testAPIkey" : {
-    "Publishable" : keys.stripe.Publishablef,
+    "Publishable" : keys.stripe.Publishable,
     "Secret" : keys.stripe.Secret
   }  
 }
@@ -31,7 +31,13 @@ environments.staging = {
   'hashingSecret' : 'this Is a secret',
   'admin' : 'admin@admin.com',
   'stripe' : stripe,
-  'mailgun' : mailgun
+  'mailgun' : mailgun,
+  'templateGlobals' : {
+    'appName' : 'assignment 3',
+    'companyName' : 'Pizza Napolitana',
+    'yearCreated' : '2018',
+    'baseUrl' : 'http://localhost:3000'
+  }
 };
 
 // Production environment
@@ -41,7 +47,13 @@ environments.production = {
   'envName' : 'production',
   'tokenLength' : 20,
   'hashingSecret' : 'this is also a secret',
-  'admin' : 'admin@admin.com'
+  'admin' : 'admin@admin.com',
+  'templateGlobals' : {
+    'appName' : 'assignment 3',
+    'companyName' : 'Pizza Napolitana',
+    'yearCreated' : '2018',
+    'baseUrl' : 'http://localhost:5000'
+  }
 };
 
 // Determine which environment was passed as a command-line argument

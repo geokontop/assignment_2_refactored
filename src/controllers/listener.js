@@ -18,6 +18,7 @@ const bufferPayload = function(req,callback){
     });
     req.on('end',function(){
         buffer += decoder.end();
+        
         callback(buffer)
     })
 }
@@ -49,28 +50,60 @@ const listenerMethod   = function(router,req,res){
     };
 
     // Choose the handler the request should go to. If one is not found, use the notFound handler.
-    const chosenHandler = typeof(router[trimmedPath])!= 'undefined'? router[trimmedPath]:router['notFound'];
+    let chosenHandler = typeof(router[trimmedPath])!= 'undefined'? router[trimmedPath]:router['notFound'];
+
+    chosenHandler = trimmedPath.indexOf('public/') > -1 ? router['public'] : chosenHandler;
 
     bufferPayload(req,function(buffer){
         
-        data.payload = helpers.parseJsonToObject(buffer)
+        data.payload = helpers.parseJsonToObject(buffer);
+
         // Route the request to the chosen handler  
-        chosenHandler(data, function(statusCode, payload){
+        chosenHandler(data, function(statusCode, payload, contentType){
+            
+            // Determint the type of response (fallback to Json)
+            contentType = typeof(contentType) == 'string' ? contentType : 'json';
+            
             // Use the status code called back by the handler or default to 200
             statusCode= typeof(statusCode) == 'number'? statusCode:200;
 
-            // Use the payload called back by the handler or default to empty object
-            payload= typeof(payload) == 'object' || typeof(payload) == 'string'? payload:data.buffer;
+            // Write response parts that are content specific
+            let payloadString = '';
 
-            // Convert the payload to a string
-            payloadString = JSON.stringify(payload);
-
-            // Write response
-            res.setHeader('Content-Type', 'application/json');
+            if(contentType== 'json'){
+                res.setHeader('Content-Type', 'application/json');
+                payload = typeof(payload) == 'object' ? payload :{};
+                payloadString = JSON.stringify(payload);
+            }
+            if(contentType == 'html'){
+                res.setHeader('Content-Type', 'text/html');
+                payloadString = typeof(payload) == 'string' ? payload :'';
+            }
+            if(contentType == 'favicon'){
+                res.setHeader('Content-Type', 'image/x-icon');
+                payloadString = typeof(payload) !== 'undefined' ? payload :'';
+            }
+            if(contentType == 'css'){
+                res.setHeader('Content-Type', 'text/css');
+                payloadString = typeof(payload) !== 'undefined' ? payload :'';
+            }
+            if(contentType == 'png'){
+                res.setHeader('Content-Type', 'image/png');
+                payloadString = typeof(payload) !== 'undefined' ? payload :'';
+            }
+            if(contentType == 'jpg'){
+                res.setHeader('Content-Type', 'image/jpg');
+                payloadString = typeof(payload) !== 'undefined' ? payload :'';
+            }
+            if(contentType == 'plain'){
+                res.setHeader('Content-Type', 'text/plain');
+                payloadString = typeof(payload) !== 'undefined' ? payload :'';
+            }
+            
+            
+            // Write response parts that are common to all content-types
             res.writeHead(statusCode);
             res.end(payloadString)
-
-
         })
     });
 }

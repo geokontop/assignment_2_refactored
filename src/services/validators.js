@@ -41,4 +41,12 @@ validator.validatePassword = (pass)=>{
     }
 }
 
+validator.validateObject = (obj)=>{
+    if(typeof(obj) == 'object' && obj !== null){
+        return obj;
+    }else{
+        return {};
+    }
+}
+
 module.exports = validator;

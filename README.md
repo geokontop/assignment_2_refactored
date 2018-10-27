@@ -1,14 +1,29 @@
-# Assignment_2
-Users and authentication (token) are handled with api calls as in the tutorial.
+# Assignment_3
+## GUI
 
-The menu is handled with api calls. Only administrator (hardcoded) can create, update, delete pizzas. Read item does not require authentication. Read menu also does not require authentication.
+1. User
+    - Signup on the site
+    - Login
+    - Logout
+    - Modify own account elements
+    - Modify own password
+    - Delete own account
 
-The shopping cart is token oriented. The cart id is the token. The token's expiration time is extended when shopping activity occurs.
+1. Menu (Authentication not required)
+    - View all the items available to order
 
-When user procceds to order, the respective api call handles the stripe payment verification providing the (example in our case) purchase token to stripe api. Subsequently calls the mailgun api to send an email to the user/customer. Finaly stores the order to the system.
+1. Shopping cart (Authentication required)
+    - Add item to cart
+    - Delete item from cart
+    - Procced to order
+
+1. Place an order (with fake credit card credentials), and receive an email receipt
+    - payment with stripe
+    - email with mailgun
+    - show the transaction outcome
 
 ## API 
-### /users
+### /api/users
 #### post
 - **Description :**  Creates a new user
 - **Happy-case response :** 200
@@ -21,7 +36,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response :** 200, user data (except password)
 - **Required query data :** email
 - **Required header data :** token
-- **Example use :** localhost:3000/users?email=joe@doe.com
+- **Example use :** localhost:3000/api/users?email=joe@doe.com
 - **Restrictions :** Every user can access only his own data
 
 #### put
@@ -38,10 +53,10 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200
 - **Required query data** : email
 - **Required header data** : token
-- **Example request** : localhost:3000/users?email=joe@doe.com
+- **Example request** : localhost:3000/api/users?email=joe@doe.com
 - **Restrictions** : Authentication, every user can delete only his own record (file)
 
-### /tokens
+### /api/tokens
 #### post
 - **Description** : Creates a new token
 - **Happy-case response** : 200, token object
@@ -54,7 +69,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200, token object e.g. {"email":"joe@doe.com","id":"1ul3xreihg4gmmg8uxk1","expires":1539295461773}
 - **Required query data** : id
 - **Required header data** : none
-- **Example request** : localhost:3000/tokens?id="tnls7gwmq2zd740pzao5"
+- **Example request** : localhost:3000/api/tokens?id="tnls7gwmq2zd740pzao5"
 
 #### put
 - **Description** : Extends expiration
@@ -69,10 +84,10 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200
 - **Required query data** : id
 - **Required header data** : none
-- **Example request** : localhost:3000/tokens?id=51kw0181psothvlxmlso
+- **Example request** : localhost:3000/api/tokens?id=51kw0181psothvlxmlso
 
 
-### /pizzas
+### /api/pizzas
 #### post
 - **Description** : Adds a new pizza file in system
 - **Happy-case response** : 200
@@ -86,7 +101,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200, pizza object 
 - **Required query data** : id 
 - **Required header data** : none
-- **Example request :** localhost:3000/pizzas?id=gorgonzola_med (returns specific pizza details)
+- **Example request :** localhost:3000/api/pizzas?id=gorgonzola_med (returns specific pizza details)
 - **Example response :** 
   {
         "id": "gorgonzola_med",
@@ -110,17 +125,17 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200
 - **Required query data** : id
 - **Required header data** : token
-- **Example request** : localhost:3000/pizzas?id=gorgonzola_med
+- **Example request** : localhost:3000/api/pizzas?id=gorgonzola_med
 - **Restrictions** : Only administrator can delete a pizza (hardcoded admin@admin.com)
 
 
-### /menu
+### /api/menu
 #### get
 - **Description** : Returns menu. The menu is generated from the pizza files saved to the system
 - **Happy-case response** : 200, pizzas array
 - **Required query data** : none
 - **Required header data** : none
-- **Example request :** localhost:3000/menu 
+- **Example request :** localhost:3000/api/menu 
 - **Example response :** 
 [
     {
@@ -142,7 +157,15 @@ When user procceds to order, the respective api call handles the stripe payment 
     }
 ]
 
-### /carts
+### /api/cart/remove
+
+#### delete
+- **Description** : Removes the cart from the system
+- **Happy-case response** : 200
+- **Required query data** : none
+- **Required header data** : token
+
+### /api/carts
 
 #### post
 - **Description** : Add a new item in shopping cart. If cart does not exist, create one with id the token id.
@@ -156,7 +179,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200, cart details
 - **Required query data** : none
 - **Required header data** : id
-- **Example request** : localhost:3000/carts
+- **Example request** : localhost:3000/api/carts
 - **Example response** : 
 {
     "cart": [
@@ -206,7 +229,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 - **Happy-case response** : 200, cart contents (after the deletion)
 - **Required query data** : id
 - **Required header data** : token
-- **Example request** : localhost:3000/carts?id=marinara_med
+- **Example request** : localhost:3000/api/carts?id=marinara_med
 - **Example response** : 
 [ 
     {
@@ -216,7 +239,7 @@ When user procceds to order, the respective api call handles the stripe payment 
 ]
 
 
-### /order
+### /api/order
 
 #### post
 - **Description** : Order the cart contents. Accept payment with stripe and acknowledge with mailgun.

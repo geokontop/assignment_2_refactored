@@ -14,7 +14,7 @@ const validator = require('../../../services/validators')
 // Optional data : none
 const deleteMethod = function(data,callback){
     // See if email is valid
-    const email = validator.validateEmail(data.queryStringObject.email) ? data.queryStringObject.email.trim():false;
+    const email = validator.validateEmail(data.payload.email) ? data.payload.email.trim():false;
     
     if(email){
         // Get the token from the headers
